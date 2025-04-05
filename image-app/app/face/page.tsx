@@ -33,7 +33,7 @@ export default function FaceVerification() {
         }
     };
 
-    const captureImage = () => {
+    const captureImage = async () => {
         if (videoRef.current && canvasRef.current) {
             const video = videoRef.current;
             const canvas = canvasRef.current;
@@ -50,6 +50,58 @@ export default function FaceVerification() {
                 // Convert canvas to base64 image
                 const imageData = canvas.toDataURL('image/jpeg');
                 setCapturedImage(imageData);
+
+                try {
+                    // Send image to API
+                    const response = await fetch('/api/save-image', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ imageData }),
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        console.log('Image saved at:', result.path);
+                        
+                        // Get stored image URL from localStorage
+                        const storedDetails = localStorage.getItem('userDetails');
+                        if (!storedDetails) {
+                            console.error('No user details found in localStorage');
+                            return;
+                        }
+                        
+                        const { imageUrl } = JSON.parse(storedDetails);
+                        
+                        // Create FormData for the Python backend
+                        const formData = new FormData();
+                        
+                        // Add captured image
+                        const captureResponse = await fetch(result.path);
+                        const captureBlob = await captureResponse.blob();
+                        formData.append('image1', captureBlob, 'capture.jpg');
+                        
+                        // Add stored image
+                        const storedResponse = await fetch(imageUrl);
+                        const storedBlob = await storedResponse.blob();
+                        formData.append('image2', storedBlob, 'stored.jpg');
+                        
+                        // Send to Python backend
+                        const verifyResponse = await fetch('http://localhost:5000/verify', {
+                            method: 'POST',
+                            body: formData,
+                        });
+                        
+                        const verifyResult = await verifyResponse.json();
+                        console.log('Verification result:', verifyResult);
+                        
+                    } else {
+                        console.error('Failed to save image:', result.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
 
                 // Stop the camera stream
                 if (stream) {
