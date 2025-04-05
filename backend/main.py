@@ -3,6 +3,11 @@ from deepface import DeepFace
 import os
 import uuid
 import werkzeug
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
 
 app = Flask(__name__)
 
