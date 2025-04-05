@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const mockDatabase: Record<string, { name: string; imageUrl: string }> = {
-    "1": { name: "John Doe", imageUrl: "https://example.com/john.jpg" },
+    "bmupz": { name: "John Doe", imageUrl: "https://example.com/john.jpg" },
     "2": { name: "Jane Smith", imageUrl: "https://example.com/jane.jpg" },
 };
 
@@ -14,5 +14,5 @@ export async function GET(request: Request) {
     }
 
     const { name, imageUrl } = mockDatabase[registrationId];
-    return NextResponse.json({ name, imageUrl });
+    return NextResponse.json({ name, imageUrl }, { status: 200 });
 }

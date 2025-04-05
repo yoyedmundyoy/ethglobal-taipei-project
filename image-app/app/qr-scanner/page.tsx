@@ -8,12 +8,16 @@ import {
   boundingBox,
   centerText,
 } from "@yudiel/react-qr-scanner";
+import { useRouter } from 'next/navigation';
 
 export default function ScannerPage() {
   const [deviceId, setDeviceId] = useState<string | undefined>(undefined);
   const [tracker, setTracker] = useState<string | undefined>("centerText");
   const [pause, setPause] = useState(false);
   const [qrData, setQrData] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const devices = useDevices();
 
@@ -31,12 +35,43 @@ export default function ScannerPage() {
     }
   }
 
-  const handleScan = (data: string) => {
+  const handleScan = async (data: string) => {
     if (!pause) {
       const cleanData = data.startsWith('^') ? data.substring(1) : data;
       setQrData(cleanData);
-      // call GET api /api/getUserDetails
-      // pass name image data to self 
+      setLoading(true);
+      setError(null);
+
+
+      try {
+        // Call the registration endpoint to get user details
+        const response = await fetch(`/api/registration?registration_id=${cleanData}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const result = await response.json();
+        console.log(result);
+
+        if (!result.error) {
+          // Store the user details in localStorage
+          localStorage.setItem('userDetails', JSON.stringify({
+            name: result.name,
+            imageUrl: result.imageUrl
+          }));
+          // Redirect to the self page
+          router.push('/self');
+        } else {
+          setError(result.message || 'Failed to get user details');
+        }
+      } catch (err) {
+        setError('Error fetching user details');
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -147,6 +182,23 @@ export default function ScannerPage() {
                 Scanner Paused
               </div>
             )}
+            {loading && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  backgroundColor: "rgba(0, 0, 0, 0.7)",
+                  color: "white",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  fontWeight: "bold",
+                }}
+              >
+                Loading...
+              </div>
+            )}
           </div>
 
           <h3 style={{ marginTop: 20, color: "#555" }}>
@@ -190,7 +242,13 @@ export default function ScannerPage() {
             </button>
           </div>
 
-          {qrData && (
+          {error && (
+            <div style={{ color: "red", marginTop: "10px" }}>
+              {error}
+            </div>
+          )}
+
+          {qrData && !loading && !error && (
             <div>
               <h4>Scanned QR Data:</h4>
               <div
