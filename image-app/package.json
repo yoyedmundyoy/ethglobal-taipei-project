@@ -9,12 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@selfxyz/core": "^0.0.24",
+    "@selfxyz/qrcode": "^0.0.17",
     "@yudiel/react-qr-scanner": "^2.2.1",
     "face-api.js": "^0.22.2",
     "next": "15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-qr-reader": "^3.0.0-beta-1",
+    "uuid": "^11.1.0",
     "webcam-easy": "^1.1.1"
   },
   "devDependencies": {

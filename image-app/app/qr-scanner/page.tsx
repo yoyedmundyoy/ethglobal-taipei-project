@@ -9,26 +9,17 @@ import {
   centerText,
 } from "@yudiel/react-qr-scanner";
 
-const styles = {
-  container: {
-    width: 400,
-    margin: "auto",
-  },
-  controls: {
-    marginBottom: 8,
-  },
-};
-
 export default function ScannerPage() {
   const [deviceId, setDeviceId] = useState<string | undefined>(undefined);
   const [tracker, setTracker] = useState<string | undefined>("centerText");
   const [pause, setPause] = useState(false);
-  const [qrData, setQrData] = useState<string | null>(null); // State to store QR data
+  const [qrData, setQrData] = useState<string | null>(null);
 
   const devices = useDevices();
 
   function getTracker() {
-    switch (tracker) {
+    const cleanTracker = tracker?.startsWith('^') ? tracker.substring(1) : tracker;
+    switch (cleanTracker) {
       case "outline":
         return outline;
       case "boundingBox":
@@ -40,85 +31,180 @@ export default function ScannerPage() {
     }
   }
 
-  // Handle QR scan result
   const handleScan = (data: string) => {
-    setQrData(data); // Set the scanned QR data into the state
+    if (!pause) {
+      const cleanData = data.startsWith('^') ? data.substring(1) : data;
+      setQrData(cleanData);
+    }
+  };
+
+  const handlePauseToggle = () => {
+    setPause(!pause);
   };
 
   return (
-    <div>
-      <div style={styles.controls}>
-        <select onChange={(e) => setDeviceId(e.target.value)}>
-          <option value={undefined}>Select a device</option>
-          {devices.map((device, index) => (
-            <option key={index} value={device.deviceId}>
-              {device.label}
-            </option>
-          ))}
-        </select>
-        <select
-          style={{ marginLeft: 5 }}
-          onChange={(e) => setTracker(e.target.value)}
-        >
-          <option value="centerText">Center Text</option>
-          <option value="outline">Outline</option>
-          <option value="boundingBox">Bounding Box</option>
-          <option value={undefined}>No Tracker</option>
-        </select>
+    <div
+      style={{
+        background: "linear-gradient(to right, #fff2e1, #f1ecfc, #ebfdf7)",
+        minHeight: "100vh",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      {/* Top Bar */}
+      <div
+        style={{
+          width: "100%",
+          padding: "0px 30px",
+          display: "flex",
+          alignItems: "center",
+          borderBottom: "1px solid  rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <img
+          src="/ethglobal-logo-vector.png"
+          alt="Logo"
+          style={{width: "160px" }}
+        />
       </div>
-      <Scanner
-        formats={[
-          "qr_code",
-          "micro_qr_code",
-          "rm_qr_code",
-          "maxi_code",
-          "pdf417",
-          "aztec",
-          "data_matrix",
-          "matrix_codes",
-          "dx_film_edge",
-          "databar",
-          "databar_expanded",
-          "codabar",
-          "code_39",
-          "code_93",
-          "code_128",
-          "ean_8",
-          "ean_13",
-          "itf",
-          "linear_codes",
-          "upc_a",
-          "upc_e",
-        ]}
-        constraints={{
-          deviceId: deviceId,
+
+      {/* Page Title Section */}
+      <div style={{ textAlign: "center", padding: "40px 20px 10px" }}>
+        <h1 className="text-4xl mb-2 lg:mb-3 lg:text-6xl font-bold">
+          Scan Your QR Code
+        </h1>
+        <p className="lg:text-lg text-black-500 font-medium">
+          Easily verify your participation at ETHGlobal events
+        </p>
+      </div>
+
+      {/* Main Content */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+          padding: "30px",
+          gap: "40px",
         }}
-        onScan={(detectedCodes) => {
-          handleScan(detectedCodes[0].rawValue); // Update state with QR data
-        }}
-        onError={(error) => {
-          console.log(`onError: ${error}'`);
-        }}
-        styles={{ container: { height: "400px", width: "350px" } }}
-        components={{
-          audio: true,
-          onOff: true,
-          torch: true,
-          zoom: true,
-          finder: true,
-          tracker: getTracker(),
-        }}
-        allowMultiple={true}
-        scanDelay={2000}
-        paused={pause}
-      />
-      {/* Display the QR data */}
-      {qrData && (
-        <div style={{ marginTop: 20 }}>
-          <h3>Scanned QR Data:</h3>
-          <p>{qrData}</p> {/* Display the QR data on the screen */}
+      >
+        <div
+          style={{
+            backgroundColor: "#ffffff",
+            padding: "30px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+            textAlign: "center",
+            width: "600px",
+            border: "2px solid black",
+          }}
+        >
+          <div style={{ position: "relative" }}>
+            <Scanner
+              formats={["qr_code"]}
+              constraints={{ deviceId }}
+              onScan={(detectedCodes) => {
+                handleScan(detectedCodes[0].rawValue);
+              }}
+              onError={(error) => console.log(`onError: ${error}`)}
+              styles={{
+                container: { 
+                  height: "400px", 
+                  width: "400px", 
+                  margin: "auto",
+                  opacity: pause ? 0.5 : 1,
+                  transition: "opacity 0.3s ease",
+                  borderRadius: "12px",
+                  overflow: "hidden",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)"
+                },
+                video: {
+                  borderRadius: "12px",
+                }
+              }}
+              components={{
+                tracker: getTracker()            
+              }}
+              allowMultiple={false}
+              scanDelay={1500}
+              paused={pause}
+            />
+            {pause && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  backgroundColor: "rgba(0, 0, 0, 0.7)",
+                  color: "white",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  fontWeight: "bold",
+                }}
+              >
+                Scanner Paused
+              </div>
+            )}
+          </div>
+
+          <h3 style={{ marginTop: 20, color: "#555" }}>
+            Scan your EthGlobal QR Code 
+          </h3>
+          <p style={{ color: "#555" }}>
+            Verify your identity with your EthGlobal QR Code.
+          </p>
+
+          {/* Controls Section */}
+          <div style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
+            <button
+              onClick={handlePauseToggle}
+              style={{
+                backgroundColor: pause ? "#c6c9f6" : "#fca4a4",
+                color: pause ? "#0a0a0a" : "#0a0a0a",
+                padding: "10px 20px",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                marginBottom: "10px",
+                width: "400px",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              <img
+                src="/qr-code-scan.png"
+                alt="QR Scanner"
+                style={{
+                  width: "20px",
+                  height: "20px",
+                  filter: "none",
+                }}
+              />
+              {pause ? "Enable Scanner" : "Disable Scanner"}
+            </button>
+          </div>
+
+          {qrData && (
+            <div>
+              <h4>Scanned QR Data:</h4>
+              <div
+                style={{
+                  backgroundColor: "#f0f0f0",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  wordWrap: "break-word",
+                }}
+              >
+                {qrData}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
