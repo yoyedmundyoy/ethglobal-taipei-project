@@ -14,5 +14,5 @@ Then to run the backend flask server:
 ngrok http 3000
 cd backend
 pip install -r requirements
-python3 app.py
+python3 main.py
 ```
