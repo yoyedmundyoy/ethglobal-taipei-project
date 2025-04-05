@@ -7,10 +7,10 @@ export default function Home() {
 
   return (
     <div>
-      {/* <h1>Face Detection and Comparison</h1>
-      <WebcamCapture /> */}
+        {/* <h1>Face Detection and Comparison</h1>
+        <WebcamCapture /> */}
       <ScannerPage />
-      
+
     </div>
   );
 }

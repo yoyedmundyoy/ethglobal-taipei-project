@@ -1,6 +1,8 @@
 import { countries, SelfBackendVerifier } from '@selfxyz/core';
 import { NextResponse } from 'next/server';
 
+let data = null;
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -27,6 +29,7 @@ export async function POST(request: Request) {
         console.log('credentialSubject', result.credentialSubject.name);
 
         if (result.isValid) {
+            data = result.credentialSubject.name;
             return NextResponse.json({
                 status: 'success',
                 result: result.isValid,
@@ -42,6 +45,22 @@ export async function POST(request: Request) {
         }
     } catch (error) {
         console.error('Error verifying proof:', error);
+        return NextResponse.json({
+            message: 'Error verifying proof',
+            error: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 });
+    }
+}
+
+export async function GET(request: Request) {
+    try {
+        console.log(`Returning data: ${data}`)
+        return NextResponse.json({
+            status: 'success',
+            name: data
+        });
+    } catch (error) {
+        console.error('Error getting data', error);
         return NextResponse.json({
             message: 'Error verifying proof',
             error: error instanceof Error ? error.message : 'Unknown error'
