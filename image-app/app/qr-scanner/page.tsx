@@ -64,6 +64,7 @@ export default function ScannerPage() {
           // Redirect to the self page
           router.push('/self');
         } else {
+          router.push('/fail');
           setError(result.message || 'Failed to get user details');
         }
       } catch (err) {

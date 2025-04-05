@@ -60,10 +60,12 @@ export default function Home() {
                     
                     if (verifiedName === details.name) {
                         console.log('✅ Names match!');
-                        window.location.href = '/verified';
+                        router.push('/face');
+                        // router.push('/success');
                     } else {
                         console.log('❌ Names do not match');
                         setError('Name verification failed - names do not match');
+                        router.push('/fail');
                     }
                 }
             } else {
