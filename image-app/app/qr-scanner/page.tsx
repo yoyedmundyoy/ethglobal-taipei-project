@@ -35,6 +35,8 @@ export default function ScannerPage() {
     if (!pause) {
       const cleanData = data.startsWith('^') ? data.substring(1) : data;
       setQrData(cleanData);
+      // call GET api /api/getUserDetails
+      // pass name image data to self 
     }
   };
 
