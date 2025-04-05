@@ -1,13 +1,18 @@
-# facial-recognition-test
+# Register Yo Self
 
-Frontend:
+Built at ETHGlobal Taipei 2025
+
+To run the frontend locally:
+```
 cd image-app
 npm i
 npm run dev
+```
 
-if running locally run ngrok on 3000 and update the link in the env file
-
-start backend flask server:
+Then to run the backend flask server:
+```
+ngrok http 3000
 cd backend
 pip install -r requirements
-
+python3 app.py
+```
